@@ -33,7 +33,6 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-//import sun.awt.image.ToolkitImage;
 
 public final class AnnotationTool extends JFrame {
 
@@ -58,7 +57,7 @@ public final class AnnotationTool extends JFrame {
   private Stroke stroke;
 
   private ShapeDef blockOutShapeDef;
-  private ShapeDef border;
+//  private ShapeDef border;
 
   private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
   private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
@@ -73,6 +72,7 @@ public final class AnnotationTool extends JFrame {
     super("Drawing Frame");
     setUndecorated(true);
 //    setOpacity(0.5F);
+//    setOpacity(0); // makes entire window and contents invisible?
 
     Toolkit toolkit = Toolkit.getDefaultToolkit();
 
@@ -110,16 +110,16 @@ public final class AnnotationTool extends JFrame {
     backingMain = createImage(w, h);
     backingScratch = createImage(w, h);
 
-    Path2D.Float borderShape = new Path2D.Float();
-    borderShape.moveTo(0, 0);
-    borderShape.lineTo(w + 10, 0);
-    borderShape.lineTo(w + 10, h + 10);
-    borderShape.lineTo(0, h + 10);
-    borderShape.closePath();
-    border = new ShapeDef(
-        new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
-        new Color(255, 128, 0, 255),
-        borderShape);
+//    Path2D.Float borderShape = new Path2D.Float();
+//    borderShape.moveTo(0, 0);
+//    borderShape.lineTo(w + 10, 0);
+//    borderShape.lineTo(w + 10, h + 10);
+//    borderShape.lineTo(0, h + 10);
+//    borderShape.closePath();
+//    border = new ShapeDef(
+//        new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
+//        new Color(255, 128, 0, 255),
+//        borderShape);
   }
 
   public void setPaint(Paint paint) {
@@ -205,12 +205,12 @@ public final class AnnotationTool extends JFrame {
     Graphics2D g = (Graphics2D) graphics;
     g.setComposite(AlphaComposite.Src);
     AffineTransform trans = g.getTransform();
-    g.translate(5, 5);
+//    g.translate(5, 5);
     g.drawImage(backingScratch, 0, 0, null);
     g.setTransform(trans);
-    g.setPaint(border.paint);
-    g.setStroke(border.stroke);
-    g.draw(border.shape);
+//    g.setPaint(border.paint);
+//    g.setStroke(border.stroke);
+//    g.draw(border.shape);
   }
 
   private Path2D.Float p2d; // shape in progress...
@@ -275,7 +275,7 @@ public final class AnnotationTool extends JFrame {
   }
 
   public static void main(final String[] args) {
-    System.err.println("Annoation tool by simon@dancingcloudservices.com");
+    System.err.println("Annotation tool by simon@dancingcloudservices.com");
     System.err.println("Icons by www.iconfinder.com");
     int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
     if (args.length == 2 || args.length == 4) {

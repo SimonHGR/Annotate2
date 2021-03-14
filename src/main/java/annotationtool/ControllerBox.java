@@ -80,6 +80,7 @@ class ControllerBox extends JFrame {
         new Color(0, 0, 255, 128),
         new Color(0, 0, 0, 0)
     };
+    private static final Color DEFAULT_COLOR = highlighterColors[2]; // Yellow highlighter
 
     private static class PaintPalletteActionListener implements ActionListener {
 
@@ -114,28 +115,31 @@ class ControllerBox extends JFrame {
 
         add(new JLabel("Pens"), gbcb.fullWidth().build());
         gbcb.nextY().singleWidth();
-        boolean first = true;
+        JRadioButton defaultColorButton = null;
         for (Color ppi : penColors) {
-            JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
+            boolean defaultSelection = DEFAULT_COLOR == ppi;
+            JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), defaultSelection);
+            if (defaultSelection) defaultColorButton = jrb;
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
-            if (first) {
-                jrb.doClick();
-                first = false;
-            }
         }
         add(new JLabel("Highlighters"), gbcb.fullWidth().nextX().build());
         gbcb.nextY().singleWidth();
 
         for (Color ppi : highlighterColors) {
-            JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
+            boolean defaultSelection = DEFAULT_COLOR == ppi;
+            JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), defaultSelection);
+            if (defaultSelection) defaultColorButton = jrb;
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
         }
+        // select the default color
+        defaultColorButton.doClick();
+
         add(new JLabel("Pen Sizes"), gbcb.fullWidth().nextY().build());
 
         thinLine = new JRadioButton("Thin");
