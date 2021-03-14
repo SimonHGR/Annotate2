@@ -27,12 +27,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public final class AnnotationTool extends JFrame {
 
@@ -152,15 +154,21 @@ public final class AnnotationTool extends JFrame {
     }
   };
 
+  // expect to overwrite the null during startup
+  private static Path baseDir = null;
+  static {
+    String imageDir = System.getProperty("annotate.imagedir");
+    if (imageDir != null) baseDir = Paths.get(imageDir);
+  }
+
   public void doSave() {
     // find filename for use
-    File outFile;
+    Path outPath;
     String fname;
     do {
       fname = String.format("image-%06d.png", saveImageIndex++);
-      System.out.println("Trying " + fname);
-      outFile = new File(fname);
-    } while (outFile.exists());
+      outPath = baseDir.resolve(fname);
+    } while (Files.exists(outPath));
 
     String imageTag = "<img src='" + fname + "'>";
     Clipboard clip = this.getToolkit().getSystemClipboard();
@@ -180,7 +188,7 @@ public final class AnnotationTool extends JFrame {
         System.err.println("Hmm, not one of those two...");
       }
 
-      ImageIO.write(outImg, "png", outFile);
+      ImageIO.write(outImg, "png", outPath.toFile());
     } catch (IOException ex) {
       System.err.println("Save failed: " + ex.getMessage());
     }
@@ -305,6 +313,16 @@ public final class AnnotationTool extends JFrame {
           System.err.println("Transparent window not supported");
         }
         System.err.println("Per-pixel transluscent OK...");
+
+        if (baseDir == null) {
+          // launch a file selector box to determine base save directory.
+          JFileChooser jfc = new JFileChooser();
+          jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          while (jfc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
+            ;
+          baseDir = jfc.getSelectedFile().toPath();
+        }
+        System.out.println("Selected base directory for images is: " + baseDir);
 
         ControllerBox controllerBox = new ControllerBox(
             new AnnotationTool(x, y, w, h)
