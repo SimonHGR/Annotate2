@@ -1,22 +1,13 @@
 package annotationtool;
 
+import util.GridBagConstraintBuilder;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-
-import util.GridBagConstraintBuilder;
 
 class ControllerBox extends JFrame {
 
@@ -167,56 +158,28 @@ class ControllerBox extends JFrame {
       if (ns == DEFAULT_STROKE) jrb.doClick();
     }
 
-//    add(new JLabel("----------"), rightGbcb.build());
-//    rightGbcb.nextY();
-
     JButton eraseButton = new JButton("Erase Transparent");
-    eraseButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.doClear();
-      }
-    });
+    eraseButton.addActionListener(e -> annotationTool.doClear());
     rightPanel.add(eraseButton, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton eraseWhiteButton = new JButton("Erase White");
-    eraseWhiteButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.doClear(new Color(255, 255, 255, 255));
-      }
-    });
+    eraseWhiteButton.addActionListener(e -> annotationTool.doClear(new Color(255, 255, 255, 255)));
     rightPanel.add(eraseWhiteButton, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton undoButton = new JButton("Undo");
-    undoButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.undo();
-      }
-    });
+    undoButton.addActionListener(e -> annotationTool.undo());
     rightPanel.add(undoButton, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton redoButton = new JButton("Redo");
-    redoButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.redo();
-      }
-    });
+    redoButton.addActionListener(e -> annotationTool.redo());
     rightPanel.add(redoButton, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton killHistoryButton = new JButton("Clear History");
-    killHistoryButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.clearHistory();
-      }
-    });
+    killHistoryButton.addActionListener(e -> annotationTool.clearHistory());
     rightPanel.add(killHistoryButton, rightGbcb.build());
     rightGbcb.nextY();
 
@@ -224,34 +187,23 @@ class ControllerBox extends JFrame {
     rightGbcb.nextY();
 
     JButton bringToTop = new JButton("Bring to top");
-    bringToTop.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
+    bringToTop.addActionListener(e -> {
         annotationTool.toFront();
         annotationTool.setAlwaysOnTop(true);
-      }
     });
     rightPanel.add(bringToTop, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton sendBack = new JButton("Send to back");
-    sendBack.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.setAlwaysOnTop(false);
-        annotationTool.toBack();
-      }
+    sendBack.addActionListener(e -> {
+      annotationTool.setAlwaysOnTop(false);
+      annotationTool.toBack();
     });
     rightPanel.add(sendBack, rightGbcb.build());
     rightGbcb.nextY();
 
     JButton save = new JButton("Save image");
-    save.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        annotationTool.doSave();
-      }
-    });
+    save.addActionListener(e -> annotationTool.doSave());
     rightPanel.add(save, rightGbcb.build());
     rightGbcb.nextY();
 
