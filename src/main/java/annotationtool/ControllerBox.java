@@ -1,14 +1,6 @@
 package annotationtool;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -119,54 +111,64 @@ class ControllerBox extends JFrame {
 
   public ControllerBox(AnnotationTool at) {
     super("Tools");
+
+    setLayout(new FlowLayout());
+    JPanel leftPanel = new JPanel();
+    add(leftPanel);
+    JPanel rightPanel = new JPanel();
+    add(rightPanel);
+
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     annotationTool = at;
-    setLayout(new GridBagLayout());
-    GridBagConstraintBuilder gbcb = new GridBagConstraintBuilder(6);
+    leftPanel.setLayout(new GridBagLayout());
+    rightPanel.setLayout(new GridBagLayout());
+
+    GridBagConstraintBuilder leftGbcb = new GridBagConstraintBuilder(6);
+    GridBagConstraintBuilder rightGbcb = new GridBagConstraintBuilder(6);
     this.setAlwaysOnTop(true);
 
     ButtonGroup toolGroup = new ButtonGroup();
 
-    add(new JLabel("Pens"), gbcb.fullWidth().build());
-    gbcb.nextY().singleWidth();
+    leftPanel.add(new JLabel("Pens"), leftGbcb.fullWidth().build());
+    leftGbcb.nextY().singleWidth();
     JRadioButton defaultColorButton = null;
     for (Color ppi : penColors) {
       boolean defaultSelection = DEFAULT_COLOR == ppi;
       JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), defaultSelection);
       if (defaultSelection) defaultColorButton = jrb;
       jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-      add(jrb, gbcb.build());
-      gbcb.nextX();
+      leftPanel.add(jrb, leftGbcb.build());
+      leftGbcb.nextX();
       toolGroup.add(jrb);
     }
-    add(new JLabel("Highlighters"), gbcb.fullWidth().nextX().build());
-    gbcb.nextY().singleWidth();
+    leftPanel.add(new JLabel("Highlighters"), leftGbcb.fullWidth().nextX().build());
+    leftGbcb.nextY().singleWidth();
 
     for (Color ppi : highlighterColors) {
       boolean defaultSelection = DEFAULT_COLOR == ppi;
       JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), defaultSelection);
       if (defaultSelection) defaultColorButton = jrb;
       jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-      add(jrb, gbcb.build());
-      gbcb.nextX();
+      leftPanel.add(jrb, leftGbcb.build());
+      leftGbcb.nextX();
       toolGroup.add(jrb);
     }
     // select the default color
     defaultColorButton.doClick();
 
-    add(new JLabel("Pen Sizes"), gbcb.fullWidth().nextY().build());
+    leftPanel.add(new JLabel("Pen Sizes"), leftGbcb.fullWidth().nextY().build());
     ButtonGroup thicknessGroup = new ButtonGroup();
     for (NamedStroke ns : strokes) {
       JRadioButton jrb = new JRadioButton(ns.name);
       jrb.addActionListener(e -> annotationTool.setStroke(ns.stroke));
-      add(jrb, gbcb.nextY().build());
-      gbcb.nextY();
+      leftPanel.add(jrb, leftGbcb.nextY().build());
+      leftGbcb.nextY();
       thicknessGroup.add(jrb);
       if (ns == DEFAULT_STROKE) jrb.doClick();
     }
 
-    add(new JLabel("----------"), gbcb.build());
-    gbcb.nextY();
+//    add(new JLabel("----------"), rightGbcb.build());
+//    rightGbcb.nextY();
 
     JButton eraseButton = new JButton("Erase Transparent");
     eraseButton.addActionListener(new ActionListener() {
@@ -175,8 +177,8 @@ class ControllerBox extends JFrame {
         annotationTool.doClear();
       }
     });
-    add(eraseButton, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(eraseButton, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton eraseWhiteButton = new JButton("Erase White");
     eraseWhiteButton.addActionListener(new ActionListener() {
@@ -185,8 +187,8 @@ class ControllerBox extends JFrame {
         annotationTool.doClear(new Color(255, 255, 255, 255));
       }
     });
-    add(eraseWhiteButton, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(eraseWhiteButton, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton undoButton = new JButton("Undo");
     undoButton.addActionListener(new ActionListener() {
@@ -195,8 +197,8 @@ class ControllerBox extends JFrame {
         annotationTool.undo();
       }
     });
-    add(undoButton, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(undoButton, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton redoButton = new JButton("Redo");
     redoButton.addActionListener(new ActionListener() {
@@ -205,8 +207,8 @@ class ControllerBox extends JFrame {
         annotationTool.redo();
       }
     });
-    add(redoButton, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(redoButton, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton killHistoryButton = new JButton("Clear History");
     killHistoryButton.addActionListener(new ActionListener() {
@@ -215,11 +217,11 @@ class ControllerBox extends JFrame {
         annotationTool.clearHistory();
       }
     });
-    add(killHistoryButton, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(killHistoryButton, rightGbcb.build());
+    rightGbcb.nextY();
 
-    add(new JLabel("----------"), gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(new JLabel("----------"), rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton bringToTop = new JButton("Bring to top");
     bringToTop.addActionListener(new ActionListener() {
@@ -229,8 +231,8 @@ class ControllerBox extends JFrame {
         annotationTool.setAlwaysOnTop(true);
       }
     });
-    add(bringToTop, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(bringToTop, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton sendBack = new JButton("Send to back");
     sendBack.addActionListener(new ActionListener() {
@@ -240,8 +242,8 @@ class ControllerBox extends JFrame {
         annotationTool.toBack();
       }
     });
-    add(sendBack, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(sendBack, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton save = new JButton("Save image");
     save.addActionListener(new ActionListener() {
@@ -250,8 +252,8 @@ class ControllerBox extends JFrame {
         annotationTool.doSave();
       }
     });
-    add(save, gbcb.build());
-    gbcb.nextY();
+    rightPanel.add(save, rightGbcb.build());
+    rightGbcb.nextY();
 
     JButton quit = new JButton("Exit");
     quit.addActionListener(new ActionListener() {
@@ -265,7 +267,7 @@ class ControllerBox extends JFrame {
         }
       }
     });
-    add(quit, gbcb.build());
+    rightPanel.add(quit, rightGbcb.build());
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
@@ -277,7 +279,6 @@ class ControllerBox extends JFrame {
         }
       }
     });
-    gbcb.nextY();
+    rightGbcb.nextY();
   }
-
 }
