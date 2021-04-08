@@ -1,21 +1,6 @@
 package annotationtool;
 
-import java.awt.AWTEvent;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
@@ -203,6 +188,9 @@ public final class AnnotationTool extends JFrame {
     gScratch.clearRect(0, 0, this.getBounds().width, this.getBounds().height);
     gScratch.drawImage(backingMain, 0, 0, null);
 
+    gScratch.setRenderingHint(
+        RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
     // if there is a "shape in progress" draw it on the scratch image
     if (p2d != null) {
       gScratch.setPaint(paint);
@@ -213,6 +201,9 @@ public final class AnnotationTool extends JFrame {
     Graphics2D g = (Graphics2D) graphics;
     g.setComposite(AlphaComposite.Src);
     AffineTransform trans = g.getTransform();
+    g.setRenderingHint(
+        RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
 //    g.translate(5, 5);
     g.drawImage(backingScratch, 0, 0, null);
     g.setTransform(trans);
@@ -241,6 +232,10 @@ public final class AnnotationTool extends JFrame {
 
   private void paintFromUndoStack() {
     Graphics2D g = (Graphics2D) backingMain.getGraphics();
+    g.setRenderingHint(
+        RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
+
     g.setBackground(clearPaint);
     g.setComposite(AlphaComposite.Src);
     g.clearRect(0, 0, this.getBounds().width, this.getBounds().height);
@@ -257,6 +252,10 @@ public final class AnnotationTool extends JFrame {
   private void commitShape(ShapeDef s) {
     undoStack.push(s);
     Graphics2D g = (Graphics2D) backingMain.getGraphics();
+    g.setRenderingHint(
+        RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
+
     g.setComposite(AlphaComposite.Src);
     g.setPaint(s.paint);
     g.setStroke(s.stroke);
