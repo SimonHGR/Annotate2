@@ -46,8 +46,8 @@ public final class AnnotationTool extends JFrame {
   private ShapeDef blockOutShapeDef;
 //  private ShapeDef border;
 
-  private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
-  private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
+  private Deque<ShapeDef> undoStack = new ArrayDeque<>();
+  private Deque<ShapeDef> redoStack = new ArrayDeque<>();
 
   private Cursor defaultCursor;
   private Cursor pencilCursor;
@@ -64,10 +64,12 @@ public final class AnnotationTool extends JFrame {
     Toolkit toolkit = Toolkit.getDefaultToolkit();
 
     try {
-      InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
+//      InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
+      InputStream imageStream = this.getClass().getResourceAsStream("CrossHairs16.png");
       System.out.println("Stream is " + imageStream);
       Image image = ImageIO.read(imageStream);
-      pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
+//      pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
+      pencilCursor = toolkit.createCustomCursor(image, new Point(7, 7), "pencil");
       defaultCursor = getCursor();
       setCursor(pencilCursor);
     } catch (IOException ioe) {
