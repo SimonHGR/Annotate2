@@ -1,0 +1,4 @@
+Improvment ideas:
+
+Allow selection of filename on save (overwrite?)
+Control-Z for undo
