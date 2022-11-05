@@ -162,9 +162,25 @@ public final class AnnotationTool extends JFrame {
       File file = chooser.getSelectedFile();
       try {
         BufferedImage loadedImage = ImageIO.read(file);
+        Image newImage = loadedImage;
+        int loadedWidth = loadedImage.getWidth();
+        int loadedHeight = loadedImage.getHeight();
+        int thisWidth = this.getWidth();
+        int thisHeight = this.getHeight();
+        if (loadedWidth > thisWidth
+        || loadedHeight > thisHeight) { // needs shrinking
+          // keep aspect ratio
+          double widthRatio = (double)thisWidth / loadedWidth;
+          double heightRatio = (double)thisHeight / loadedHeight;
+          double requiredRatio = Math.min(widthRatio, heightRatio);
+          int targetWidth = (int)(loadedWidth * requiredRatio);
+          int targetHeight = (int)(loadedHeight * requiredRatio);
+          newImage = loadedImage.getScaledInstance(
+              targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        }
         clearHistory();
         // add loadedImage as a "shape" to be drawn in the stack.
-        commitShape(new ShapeDef(null, null, null, loadedImage));
+        commitShape(new ShapeDef(null, null, null, newImage));
         repaint();
       } catch (IOException e) {
         System.err.println("Failed to load image");
@@ -227,7 +243,6 @@ public final class AnnotationTool extends JFrame {
     gScratch.setComposite(AlphaComposite.Src);
     gScratch.setBackground(clearPaint);
     gScratch.clearRect(0, 0, this.getBounds().width, this.getBounds().height);
-    System.err.println("drawing backingMain");
     gScratch.drawImage(backingMain, 0, 0, null);
 
     gScratch.setRenderingHint(
