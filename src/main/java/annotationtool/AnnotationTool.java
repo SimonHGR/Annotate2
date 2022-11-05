@@ -162,19 +162,33 @@ public final class AnnotationTool extends JFrame {
     clip.setContents(new StringSelection(imageTag), clipboardOwner);
     System.out.println(imageTag);
 
-    try {
-      BufferedImage outImg = null;
-      if (backingMain instanceof BufferedImage) {
+    // no image found yet...
+    BufferedImage outImg = null;
+
+      // get bounding rectangle for image
+      Rectangle bounds = this.getBounds();
+      try {
+        Robot robot = new Robot();
+        outImg = robot.createScreenCapture(bounds);
+      } catch (AWTException e) {
+        System.err.println("Failed to create Robot for screen capture");
+      }
+
+      // fallback capture (does not get the background under
+      // transparent pixels of drawing area)
+      if(outImg == null && backingMain instanceof BufferedImage) {
         outImg = (BufferedImage) backingMain;
       } 
 //      else if (backingMain instanceof ToolkitImage) {
 //        System.err.println("Using toolkit image...");
 //        outImg = ((ToolkitImage) backingMain).getBufferedImage();
 //      } 
-      else {
-        System.err.println("Hmm, not one of those two...");
+      if (outImg == null) {
+        System.err.println("Failed to find workable image capture method");
+        return; // give up
       }
 
+    try {
       ImageIO.write(outImg, "png", outPath.toFile());
     } catch (IOException ex) {
       System.err.println("Save failed: " + ex.getMessage());
