@@ -5,6 +5,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -114,6 +116,17 @@ public final class AnnotationTool extends JFrame {
 //        new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
 //        new Color(255, 128, 0, 255),
 //        borderShape, null);
+
+    addKeyListener(new KeyAdapter() {
+      @Override
+      public void keyTyped(KeyEvent e) {
+        if(e.getKeyChar() == 26) {
+          undo();
+        } else if (e.getKeyChar() == 25) {
+          redo();
+        }
+      }
+    });
   }
 
   public void setPaint(Paint paint) {
