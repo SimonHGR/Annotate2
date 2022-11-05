@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public final class AnnotationTool extends JFrame {
 
@@ -28,11 +30,13 @@ public final class AnnotationTool extends JFrame {
     Shape shape;
     Paint paint;
     Stroke stroke;
+    Image img;
 
-    ShapeDef(Stroke stroke, Paint paint, Shape shape) {
+    ShapeDef(Stroke stroke, Paint paint, Shape shape, Image img) {
       this.stroke = stroke;
       this.paint = paint;
       this.shape = shape;
+      this.img = img;
     }
   }
 
@@ -84,7 +88,7 @@ public final class AnnotationTool extends JFrame {
     blockOutShape = new Path2D.Float();
     blockOutShape.moveTo(0, h / 2);
     blockOutShape.lineTo(w, h / 2);
-    blockOutShapeDef = new ShapeDef(blockOutStroke, clearPaint, blockOutShape);
+    blockOutShapeDef = new ShapeDef(blockOutStroke, clearPaint, blockOutShape, null);
 
     // make the window transparent
     setBackground(clearPaint);
@@ -99,6 +103,7 @@ public final class AnnotationTool extends JFrame {
     backingMain = createImage(w, h);
     backingScratch = createImage(w, h);
 
+    // create a drawing panel border, if desired!
 //    Path2D.Float borderShape = new Path2D.Float();
 //    borderShape.moveTo(0, 0);
 //    borderShape.lineTo(w + 10, 0);
@@ -108,7 +113,7 @@ public final class AnnotationTool extends JFrame {
 //    border = new ShapeDef(
 //        new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
 //        new Color(255, 128, 0, 255),
-//        borderShape);
+//        borderShape, null);
   }
 
   public void setPaint(Paint paint) {
@@ -146,6 +151,26 @@ public final class AnnotationTool extends JFrame {
   static {
     String imageDir = System.getProperty("annotate.imagedir");
     if (imageDir != null) baseDir = Paths.get(imageDir);
+  }
+
+  public void doLoad() {
+    JFileChooser chooser = new JFileChooser();
+    FileNameExtensionFilter filter = new FileNameExtensionFilter(
+        "Image files", "bmp", "jpg", "jpeg", "png", "gif", "tif", "tiff");
+    chooser.setFileFilter(filter);
+    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      File file = chooser.getSelectedFile();
+      try {
+        BufferedImage loadedImage = ImageIO.read(file);
+        clearHistory();
+        // add loadedImage as a "shape" to be drawn in the stack.
+        commitShape(new ShapeDef(null, null, null, loadedImage));
+        repaint();
+      } catch (IOException e) {
+        System.err.println("Failed to load image");
+        e.printStackTrace(System.err);
+      }
+    }
   }
 
   public void doSave() {
@@ -202,6 +227,7 @@ public final class AnnotationTool extends JFrame {
     gScratch.setComposite(AlphaComposite.Src);
     gScratch.setBackground(clearPaint);
     gScratch.clearRect(0, 0, this.getBounds().width, this.getBounds().height);
+    System.err.println("drawing backingMain");
     gScratch.drawImage(backingMain, 0, 0, null);
 
     gScratch.setRenderingHint(
@@ -258,9 +284,14 @@ public final class AnnotationTool extends JFrame {
     Iterator<ShapeDef> sdi = undoStack.descendingIterator();
     while (sdi.hasNext()) {
       ShapeDef s = sdi.next();
-      g.setPaint(s.paint);
-      g.setStroke(s.stroke);
-      g.draw(s.shape);
+      if (s.stroke != null) {
+        g.setPaint(s.paint);
+        g.setStroke(s.stroke);
+        g.draw(s.shape);
+      } else {
+        assert s.img != null;
+        g.drawImage(s.img, 0, 0, null);
+      }
     }
     repaint();
   }
@@ -272,11 +303,16 @@ public final class AnnotationTool extends JFrame {
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_ON);
 
-    g.setComposite(AlphaComposite.Src);
-    g.setPaint(s.paint);
-    g.setStroke(s.stroke);
-    g.draw(s.shape);
-    p2d = null;
+    if (s.shape != null) {
+      g.setComposite(AlphaComposite.Src);
+      g.setPaint(s.paint);
+      g.setStroke(s.stroke);
+      g.draw(s.shape);
+      p2d = null;
+    } else {
+      assert s.img != null;
+      g.drawImage(s.img, 0, 0, null);
+    }
   }
 
   @Override
@@ -290,7 +326,7 @@ public final class AnnotationTool extends JFrame {
       } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
         p2d.lineTo(me.getX(), me.getY());
       } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-        ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+        ShapeDef sd = new ShapeDef(stroke, paint, p2d, null);
         commitShape(sd);
       }
       repaint();

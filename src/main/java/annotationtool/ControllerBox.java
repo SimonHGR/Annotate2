@@ -202,6 +202,11 @@ class ControllerBox extends JFrame {
     rightPanel.add(sendBack, rightGbcb.build());
     rightGbcb.nextY();
 
+    JButton load = new JButton("Load image");
+    load.addActionListener(e -> annotationTool.doLoad());
+    rightPanel.add(load, rightGbcb.build());
+    rightGbcb.nextY();
+
     JButton save = new JButton("Save image");
     save.addActionListener(e -> annotationTool.doSave());
     rightPanel.add(save, rightGbcb.build());
