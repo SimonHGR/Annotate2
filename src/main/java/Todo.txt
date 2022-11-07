@@ -1,3 +1,7 @@
 Improvment ideas:
 
 Allow selection of filename on save (overwrite?)
+Allow removal of specific elements from the undo stack?
+- perhaps with thumbnail image of what stack items look like?
+- perhaps with names for some items like "background", "loaded image"?
+- if implemented, perhaps "load image" should not clear out the undo/redo stacks?
