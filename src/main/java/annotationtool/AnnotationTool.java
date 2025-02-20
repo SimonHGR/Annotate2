@@ -4,14 +4,12 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,23 +25,21 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public final class AnnotationTool extends JFrame {
 
-  private record ShapeDef(Stroke stroke, Paint paint, Shape shape, Image img) {}
+  private record ShapeDef(Stroke stroke, Paint paint, Shape shape, Image img) {
+  }
 
-  private Image backingMain;
-  private Image backingScratch;
-  private static Color clearPaint = new Color(0, 0, 0, 0);
+  private final Image backingMain;
+  private final Image backingScratch;
+  private final static Color clearPaint = new Color(0, 0, 0, 0);
 
   private Paint paint;
   private Stroke stroke;
 
-  private Stroke blockOutStroke;
-  private Path2D.Float blockOutShape;
+  private final Stroke blockOutStroke;
+  private final Path2D.Float blockOutShape;
 
-  private Deque<ShapeDef> undoStack = new ArrayDeque<>();
-  private Deque<ShapeDef> redoStack = new ArrayDeque<>();
-
-  private Cursor defaultCursor;
-  private Cursor pencilCursor;
+  private final Deque<ShapeDef> undoStack = new ArrayDeque<>();
+  private final Deque<ShapeDef> redoStack = new ArrayDeque<>();
 
   private int saveImageIndex = 0;
 
@@ -60,8 +56,7 @@ public final class AnnotationTool extends JFrame {
       InputStream imageStream = this.getClass().getResourceAsStream(iconFile);
       System.out.println("Stream is " + imageStream);
       Image image = ImageIO.read(imageStream);
-      pencilCursor = toolkit.createCustomCursor(image, new Point(iconX, iconY), iconFile);
-      defaultCursor = getCursor();
+      Cursor pencilCursor = toolkit.createCustomCursor(image, new Point(iconX, iconY), iconFile);
       setCursor(pencilCursor);
     } catch (IOException ioe) {
       ioe.printStackTrace(System.err);
@@ -102,7 +97,7 @@ public final class AnnotationTool extends JFrame {
     addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
-        if(e.getKeyChar() == 26) {
+        if (e.getKeyChar() == 26) {
           undo();
         } else if (e.getKeyChar() == 25) {
           redo();
@@ -135,14 +130,12 @@ public final class AnnotationTool extends JFrame {
     redoStack.clear();
   }
 
-  final ClipboardOwner clipboardOwner = new ClipboardOwner() {
-    @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
-    }
+  final ClipboardOwner clipboardOwner = (clipboard, contents) -> {
   };
 
   // expect to overwrite the null during startup
   private static Path baseDir = null;
+
   static {
     String imageDir = System.getProperty("annotate.imagedir");
     if (imageDir != null) baseDir = Paths.get(imageDir);
@@ -163,13 +156,13 @@ public final class AnnotationTool extends JFrame {
         int thisWidth = this.getWidth();
         int thisHeight = this.getHeight();
         if (loadedWidth > thisWidth
-        || loadedHeight > thisHeight) { // needs shrinking
+            || loadedHeight > thisHeight) { // needs shrinking
           // keep aspect ratio
-          double widthRatio = (double)thisWidth / loadedWidth;
-          double heightRatio = (double)thisHeight / loadedHeight;
+          double widthRatio = (double) thisWidth / loadedWidth;
+          double heightRatio = (double) thisHeight / loadedHeight;
           double requiredRatio = Math.min(widthRatio, heightRatio);
-          int targetWidth = (int)(loadedWidth * requiredRatio);
-          int targetHeight = (int)(loadedHeight * requiredRatio);
+          int targetWidth = (int) (loadedWidth * requiredRatio);
+          int targetHeight = (int) (loadedHeight * requiredRatio);
           newImage = loadedImage.getScaledInstance(
               targetWidth, targetHeight, Image.SCALE_SMOOTH);
         }
@@ -201,28 +194,28 @@ public final class AnnotationTool extends JFrame {
     // no image found yet...
     BufferedImage outImg = null;
 
-      // get bounding rectangle for image
-      Rectangle bounds = this.getBounds();
-      try {
-        Robot robot = new Robot();
-        outImg = robot.createScreenCapture(bounds);
-      } catch (AWTException e) {
-        System.err.println("Failed to create Robot for screen capture");
-      }
+    // get bounding rectangle for image
+    Rectangle bounds = this.getBounds();
+    try {
+      Robot robot = new Robot();
+      outImg = robot.createScreenCapture(bounds);
+    } catch (AWTException e) {
+      System.err.println("Failed to create Robot for screen capture");
+    }
 
-      // fallback capture (does not get the background under
-      // transparent pixels of drawing area)
-      if(outImg == null && backingMain instanceof BufferedImage) {
-        outImg = (BufferedImage) backingMain;
-      } 
+    // fallback capture (does not get the background under
+    // transparent pixels of drawing area)
+    if (outImg == null && backingMain instanceof BufferedImage) {
+      outImg = (BufferedImage) backingMain;
+    }
 //      else if (backingMain instanceof ToolkitImage) {
 //        System.err.println("Using toolkit image...");
 //        outImg = ((ToolkitImage) backingMain).getBufferedImage();
 //      } 
-      if (outImg == null) {
-        System.err.println("Failed to find workable image capture method");
-        return; // give up
-      }
+    if (outImg == null) {
+      System.err.println("Failed to find workable image capture method");
+      return; // give up
+    }
 
     try {
       ImageIO.write(outImg, "png", outPath.toFile());
@@ -267,7 +260,7 @@ public final class AnnotationTool extends JFrame {
   private Path2D.Float p2d; // shape in progress...
 
   public void undo() {
-    if (undoStack.size() > 0) {
+    if (!undoStack.isEmpty()) {
       ShapeDef sd = undoStack.pop();
       redoStack.push(sd);
       paintFromUndoStack();
@@ -275,7 +268,7 @@ public final class AnnotationTool extends JFrame {
   }
 
   public void redo() {
-    if (redoStack.size() > 0) {
+    if (!redoStack.isEmpty()) {
       ShapeDef sd = redoStack.pop();
       undoStack.push(sd);
       paintFromUndoStack();
@@ -328,8 +321,7 @@ public final class AnnotationTool extends JFrame {
   @Override
   protected void processEvent(AWTEvent evt) {
     super.processEvent(evt);
-    if (evt instanceof MouseEvent) {
-      MouseEvent me = (MouseEvent) evt;
+    if (evt instanceof MouseEvent me) {
       if (me.getID() == MouseEvent.MOUSE_PRESSED) {
         p2d = new Path2D.Float();
         p2d.moveTo(me.getX(), me.getY());
@@ -374,36 +366,34 @@ public final class AnnotationTool extends JFrame {
     final String iconFile = iconFile1;
     final int iconX = iconX1, iconY = iconY1;
     // Create the GUI on the event-dispatching thread
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        GraphicsEnvironment ge = GraphicsEnvironment
-            .getLocalGraphicsEnvironment();
+    SwingUtilities.invokeLater(() -> {
+          GraphicsEnvironment ge = GraphicsEnvironment
+              .getLocalGraphicsEnvironment();
 
-        // check if the OS supports translucency
-        if (!ge.getDefaultScreenDevice().isWindowTranslucencySupported(
-            GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT)) {
-          System.err.println("Transparent window not supported");
+          // check if the OS supports translucency
+          if (!ge.getDefaultScreenDevice().isWindowTranslucencySupported(
+              GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT)) {
+            System.err.println("Transparent window not supported");
+          }
+          System.err.println("Per-pixel transluscent OK...");
+
+          if (baseDir == null) {
+            // launch a file selector box to determine base save directory.
+            JFileChooser jfc = new JFileChooser();
+            jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            while (jfc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
+              ;
+            baseDir = jfc.getSelectedFile().toPath();
+          }
+          System.out.println("Selected base directory for images is: " + baseDir);
+
+          ControllerBox controllerBox = new ControllerBox(
+              new AnnotationTool(x, y, w, h, iconFile, iconX, iconY)
+          );
+          controllerBox.setBounds(x + w + 10, y, 0, 0);
+          controllerBox.pack();
+          controllerBox.setVisible(true);
         }
-        System.err.println("Per-pixel transluscent OK...");
-
-        if (baseDir == null) {
-          // launch a file selector box to determine base save directory.
-          JFileChooser jfc = new JFileChooser();
-          jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-          while (jfc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
-            ;
-          baseDir = jfc.getSelectedFile().toPath();
-        }
-        System.out.println("Selected base directory for images is: " + baseDir);
-
-        ControllerBox controllerBox = new ControllerBox(
-            new AnnotationTool(x, y, w, h, iconFile, iconX, iconY)
-        );
-        controllerBox.setBounds(x + w + 10, y, 0, 0);
-        controllerBox.pack();
-        controllerBox.setVisible(true);
-      }
-    });
+    );
   }
 }
