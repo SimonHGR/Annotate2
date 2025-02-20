@@ -27,20 +27,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public final class AnnotationTool extends JFrame {
 
-  private class ShapeDef {
-
-    Shape shape;
-    Paint paint;
-    Stroke stroke;
-    Image img;
-
-    ShapeDef(Stroke stroke, Paint paint, Shape shape, Image img) {
-      this.stroke = stroke;
-      this.paint = paint;
-      this.shape = shape;
-      this.img = img;
-    }
-  }
+  private record ShapeDef(Stroke stroke, Paint paint, Shape shape, Image img) {}
 
   private Image backingMain;
   private Image backingScratch;
@@ -49,8 +36,8 @@ public final class AnnotationTool extends JFrame {
   private Paint paint;
   private Stroke stroke;
 
-  private ShapeDef blockOutShapeDef;
-//  private ShapeDef border;
+  private Stroke blockOutStroke;
+  private Path2D.Float blockOutShape;
 
   private Deque<ShapeDef> undoStack = new ArrayDeque<>();
   private Deque<ShapeDef> redoStack = new ArrayDeque<>();
@@ -82,13 +69,10 @@ public final class AnnotationTool extends JFrame {
 
     setBounds(x - 5, y - 5, w + 10, h + 10);
 
-    Stroke blockOutStroke;
-    Path2D.Float blockOutShape;
     blockOutStroke = new BasicStroke(h, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
     blockOutShape = new Path2D.Float();
     blockOutShape.moveTo(0, h / 2);
     blockOutShape.lineTo(w, h / 2);
-    blockOutShapeDef = new ShapeDef(blockOutStroke, clearPaint, blockOutShape, null);
 
     // make the window transparent
     setBackground(clearPaint);
@@ -136,7 +120,7 @@ public final class AnnotationTool extends JFrame {
   }
 
   public void doClear(Paint paint) {
-    blockOutShapeDef.paint = paint;
+    ShapeDef blockOutShapeDef = new ShapeDef(blockOutStroke, paint, blockOutShape, null);
     commitShape(blockOutShapeDef);
     repaint();
   }
