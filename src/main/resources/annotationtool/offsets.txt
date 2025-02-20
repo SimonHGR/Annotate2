@@ -1,0 +1,6 @@
+# offsets for "cursor hotspot" for images:
+CrossHairs16.png -- 7, 7
+Pencil-32.png -- 1, 30
+pointing_hand-64.png -- 27, 1
+pointing_hand-48.png -- 20, 1
+pointing_hand-32.png -- 13, 0

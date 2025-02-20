@@ -60,7 +60,7 @@ public final class AnnotationTool extends JFrame {
 
   private int saveImageIndex = 0;
 
-  public AnnotationTool(int x, int y, int w, int h) {
+  public AnnotationTool(int x, int y, int w, int h, String iconFile, int iconX, int iconY) {
 
     super("Drawing Frame");
     setUndecorated(true);
@@ -70,12 +70,10 @@ public final class AnnotationTool extends JFrame {
     Toolkit toolkit = Toolkit.getDefaultToolkit();
 
     try {
-//      InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
-      InputStream imageStream = this.getClass().getResourceAsStream("CrossHairs16.png");
+      InputStream imageStream = this.getClass().getResourceAsStream(iconFile);
       System.out.println("Stream is " + imageStream);
       Image image = ImageIO.read(imageStream);
-//      pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
-      pencilCursor = toolkit.createCustomCursor(image, new Point(7, 7), "pencil");
+      pencilCursor = toolkit.createCustomCursor(image, new Point(iconX, iconY), iconFile);
       defaultCursor = getCursor();
       setCursor(pencilCursor);
     } catch (IOException ioe) {
@@ -364,21 +362,33 @@ public final class AnnotationTool extends JFrame {
   public static void main(final String[] args) {
     System.err.println("Annotation tool by simon@dancingcloudservices.com");
     System.err.println("Icons by www.iconfinder.com");
-    int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
-    if (args.length == 2 || args.length == 4) {
+    int x1 = 0, y1 = 0; // default top-left
+    int w1 = 1280, h1 = 720; // default width/height
+    String iconFile1 = "CrossHairs16.png"; // default image icon
+    int iconX1 = 7, iconY1 = 7; // hotspot for CrossHairs16 image
+
+    if (args.length == 2 || args.length == 4 || args.length == 7) {
       w1 = Integer.parseInt(args[0]);
       h1 = Integer.parseInt(args[1]);
-      if (args.length == 4) {
+      if (args.length > 2) {
         x1 = Integer.parseInt(args[2]);
         y1 = Integer.parseInt(args[3]);
+      }
+      if (args.length > 4) {
+        iconFile1 = args[4];
+        iconX1 = Integer.parseInt(args[5]);
+        iconY1 = Integer.parseInt(args[6]);
       }
       System.out.println("AnnotationTool " + w1 + " by " + h1 + " offset: " + x1 + "," + y1);
     } else if (args.length != 0) {
       System.err.println("Usage: java annotationtool.AnnotationTool "
-          + "[<width> <height> [ <x> <y>]]"
-          + "\nUsing defaults 1280 720 50 50");
+          + "[<width> <height> [ <x> <y>]] [<iconfile>, <hotspotX>, <hotspotY>]"
+          + "\nUsing defaults " + w1 + "x" + h1 + " @" + x1 + "," + y1 +
+          ", cursor " + iconFile1 + ", hotspot " + iconX1 + "," + iconY1);
     }
     final int x = x1, y = y1, w = w1, h = h1;
+    final String iconFile = iconFile1;
+    final int iconX = iconX1, iconY = iconY1;
     // Create the GUI on the event-dispatching thread
     SwingUtilities.invokeLater(new Runnable() {
       @Override
@@ -404,7 +414,7 @@ public final class AnnotationTool extends JFrame {
         System.out.println("Selected base directory for images is: " + baseDir);
 
         ControllerBox controllerBox = new ControllerBox(
-            new AnnotationTool(x, y, w, h)
+            new AnnotationTool(x, y, w, h, iconFile, iconX, iconY)
         );
         controllerBox.setBounds(x + w + 10, y, 0, 0);
         controllerBox.pack();

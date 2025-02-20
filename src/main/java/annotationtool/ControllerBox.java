@@ -168,6 +168,11 @@ class ControllerBox extends JFrame {
     rightPanel.add(eraseWhiteButton, rightGbcb.build());
     rightGbcb.nextY();
 
+    JButton eraseBlackButton = new JButton("Erase Black");
+    eraseBlackButton.addActionListener(e -> annotationTool.doClear(new Color(0, 0, 0, 255)));
+    rightPanel.add(eraseBlackButton, rightGbcb.build());
+    rightGbcb.nextY();
+
     JButton undoButton = new JButton("Undo");
     undoButton.addActionListener(e -> annotationTool.undo());
     rightPanel.add(undoButton, rightGbcb.build());
