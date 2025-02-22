@@ -30,7 +30,9 @@ public final class AnnotationTool extends JFrame {
 
   private final Image backingMain;
   private final Image backingScratch;
-  private final static Color clearPaint = new Color(0, 0, 0, 0);
+  private final Color clearPaint = POINTER_MODE ?
+      new Color(0, 0, 0, 255) :
+      new Color(0, 0, 0, 0);
 
   private Paint paint;
   private Stroke stroke;
@@ -70,7 +72,7 @@ public final class AnnotationTool extends JFrame {
     blockOutShape.lineTo(w, h / 2);
 
     // make the window transparent
-    setBackground(clearPaint);
+    setBackground(clearPaint);  // TODO allow this to be black for pointer mode
 
     setPreferredSize(new Dimension(w + 10, h + 10));
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -97,10 +99,13 @@ public final class AnnotationTool extends JFrame {
     addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
-        if (e.getKeyChar() == 26) {
+        System.out.println("key: extended code is " + (int)e.getExtendedKeyCode());
+        if (e.getKeyChar() == 26) { // Control-Z for undo
           undo();
-        } else if (e.getKeyChar() == 25) {
+        } else if (e.getKeyChar() == 25) { // Control-Y for redo
           redo();
+        } else if (e.getKeyChar() == 'C' || e.getKeyChar() == 'c') { // Toggle controller box
+          controllerBox.setVisible(!controllerBox.isVisible());
         }
       }
     });
@@ -335,15 +340,24 @@ public final class AnnotationTool extends JFrame {
     }
   }
 
+  public static boolean POINTER_MODE = false;
+  public static ControllerBox controllerBox;
+
   public static void main(final String[] args) {
     System.err.println("Annotation tool by simon@dancingcloudservices.com");
     System.err.println("Icons by www.iconfinder.com");
     int x1 = 0, y1 = 0; // default top-left
-    int w1 = 1280, h1 = 720; // default width/height
+    Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+    int w1 = size.width, h1 = size.height; // default width/height
     String iconFile1 = "CrossHairs16.png"; // default image icon
     int iconX1 = 7, iconY1 = 7; // hotspot for CrossHairs16 image
 
-    if (args.length == 2 || args.length == 4 || args.length == 7) {
+    if (args.length == 1 && "pointer".equals(args[0])) {
+      POINTER_MODE = true;
+      iconFile1 = "pointing_hand-64.png";
+      iconX1 = 27;
+      iconY1 = 1;
+    } else if (args.length == 2 || args.length == 4 || args.length == 7) {
       w1 = Integer.parseInt(args[0]);
       h1 = Integer.parseInt(args[1]);
       if (args.length > 2) {
@@ -377,7 +391,7 @@ public final class AnnotationTool extends JFrame {
           }
           System.err.println("Per-pixel transluscent OK...");
 
-          if (baseDir == null) {
+          if (baseDir == null && !POINTER_MODE) {
             // launch a file selector box to determine base save directory.
             JFileChooser jfc = new JFileChooser();
             jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -387,12 +401,12 @@ public final class AnnotationTool extends JFrame {
           }
           System.out.println("Selected base directory for images is: " + baseDir);
 
-          ControllerBox controllerBox = new ControllerBox(
+          controllerBox = new ControllerBox(
               new AnnotationTool(x, y, w, h, iconFile, iconX, iconY)
           );
           controllerBox.setBounds(x + w + 10, y, 0, 0);
           controllerBox.pack();
-          controllerBox.setVisible(true);
+          controllerBox.setVisible(!POINTER_MODE);
         }
     );
   }

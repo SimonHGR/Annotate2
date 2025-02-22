@@ -64,7 +64,8 @@ class ControllerBox extends JFrame {
       new Color(0, 0, 255, 128),
       new Color(0, 0, 0, 0)
   };
-  private static final Color DEFAULT_COLOR = highlighterColors[2]; // Yellow highlighter
+  private static final Color DEFAULT_COLOR = AnnotationTool.POINTER_MODE ?
+      penColors[7] : highlighterColors[2]; // Solid white, or yellow highlighter
 
   private static class NamedStroke {
     public String name;
@@ -82,7 +83,7 @@ class ControllerBox extends JFrame {
       new NamedStroke("Thick", new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)),
       new NamedStroke("Huge", new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)),
   };
-  private static final NamedStroke DEFAULT_STROKE = strokes[2];
+  private static final NamedStroke DEFAULT_STROKE = strokes[AnnotationTool.POINTER_MODE ? 0 : 2];
 
   private static class PaintPalletteActionListener implements ActionListener {
 
@@ -207,15 +208,17 @@ class ControllerBox extends JFrame {
     rightPanel.add(sendBack, rightGbcb.build());
     rightGbcb.nextY();
 
-    JButton load = new JButton("Load image");
-    load.addActionListener(e -> annotationTool.doLoad());
-    rightPanel.add(load, rightGbcb.build());
-    rightGbcb.nextY();
+    if (!AnnotationTool.POINTER_MODE) {
+      JButton load = new JButton("Load image");
+      load.addActionListener(e -> annotationTool.doLoad());
+      rightPanel.add(load, rightGbcb.build());
+      rightGbcb.nextY();
 
-    JButton save = new JButton("Save image");
-    save.addActionListener(e -> annotationTool.doSave());
-    rightPanel.add(save, rightGbcb.build());
-    rightGbcb.nextY();
+      JButton save = new JButton("Save image");
+      save.addActionListener(e -> annotationTool.doSave());
+      rightPanel.add(save, rightGbcb.build());
+      rightGbcb.nextY();
+    }
 
     JButton quit = new JButton("Exit");
     quit.addActionListener(new ActionListener() {
