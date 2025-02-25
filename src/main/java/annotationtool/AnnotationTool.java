@@ -48,7 +48,12 @@ public final class AnnotationTool extends JFrame {
   public AnnotationTool(int x, int y, int w, int h, String iconFile, int iconX, int iconY) {
 
     super("Drawing Frame");
+    GraphicsDevice gDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    boolean fullScreenOK = gDevice.isFullScreenSupported();
+    System.out.println("FullScreen? " + fullScreenOK);
     setUndecorated(true);
+
+//    setExtendedState(JFrame.MAXIMIZED_BOTH);
 //    setOpacity(0.5F);
 //    setOpacity(0); // makes entire window and contents invisible?
 
@@ -79,6 +84,9 @@ public final class AnnotationTool extends JFrame {
     enableEvents(AWTEvent.KEY_EVENT_MASK
         + AWTEvent.MOUSE_EVENT_MASK
         + AWTEvent.MOUSE_MOTION_EVENT_MASK);
+    if (fullScreenOK) {
+      gDevice.setFullScreenWindow(this);
+    }
     setVisible(true);
 
     backingMain = createImage(w, h);
